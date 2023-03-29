@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.slider {
+  /* background-color: aqua; */
+  position: relative;
+  width: 30rem;
+  height: 22rem;
+  top: 0;
+}
+
+.slider article {
+  position: absolute;
+  transition: 1s ease-in-out all;
+  opacity: 1;
+  /* transform: translateX(100%); */
+}

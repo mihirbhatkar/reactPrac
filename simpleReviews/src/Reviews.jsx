@@ -1,79 +1,96 @@
-import { useState } from "react";
+import { Card } from "./Card";
+import { useEffect, useState } from "react";
 import reviews from "./data";
-import { ImQuotesLeft } from "react-icons/im";
 
 const Reviews = () => {
-  const [show, setShow] = useState(0);
-  const [disable, setDisable] = useState(false);
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (index < reviews.length - 1) {
+        setIndex(index + 1);
+      } else {
+        setIndex(0);
+      }
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  });
 
   const handleForwardClick = () => {
-    if (show < reviews.length - 1) {
-      setShow(show + 1);
-    } else {
-      setShow(0);
-    }
-  };
-  const handleBackwardClick = () => {
-    if (show > 0) {
-      setShow(show - 1);
-    } else {
-      setShow(reviews.length - 1);
-    }
-  };
-  const surprise = () => {
-    var randomValue = Math.floor(Math.random() * reviews.length);
-    if (randomValue == show) {
-      surprise();
-    } else {
-      setShow(randomValue);
-    }
+    setIndex((oldIndex) => {
+      const result = (oldIndex + 1) % reviews.length;
+      return result;
+    });
   };
 
-  const { name, job, image, text } = reviews[show];
+  const handleBackwardClick = () => {
+    if (index > 0) setIndex(index - 1);
+    else setIndex(reviews.length - 1);
+  };
+
+  // const surprise = () => {
+  //   var randomValue = Math.floor(Math.random() * reviews.length);
+  //   if (randomValue == index) {
+  //     surprise();
+  //   } else {
+  //     setIndex(randomValue);
+  //   }
+  // };
 
   return (
     <div className="flex items-center justify-center min-h-screen text-center font-serif">
       <div className="flex flex-col items-center justify-center">
         <h1 className=" text-blue-400 text-[3rem] ">Reviews</h1>
         <hr className="w-5" />
-        <div className="p-5 m-5 bg-blue-100 rounded-sm shadow-xl flex flex-col items-center gap-2 max-w-lg">
-          <div className="relative">
-            <img
-              src={image}
-              alt=""
-              className=" object-cover rounded-[50%] w-[100px] h-[100px] border-black border-solid border-2"
-            />
-            <span className="  absolute top-3 left-[-5px] bg-blue-300 p-1 rounded-xl">
-              <ImQuotesLeft />
-            </span>
-          </div>
+        <div className="slider w-full">
+          {reviews.map((item, itemIndex) => {
+            const { name, job, image, text } = item;
 
-          <span className=" capitalize font-bold">{name} </span>
-          <span className=" capitalize  italic font-bold text-blue-400">
-            {job}
-          </span>
-          <p>{text}</p>
-          <div className=" space-x-2">
-            <button
-              onClick={handleBackwardClick}
-              className=" bg-white rounded-sm p-2 disabled:opacity-40"
-              disabled={disable}
-            >
-              &#60;
-            </button>
-            <button
-              onClick={handleForwardClick}
-              className=" bg-white rounded-sm p-2 disabled:opacity-40"
-              disabled={disable}
-            >
-              {" "}
-              &#62;{" "}
-            </button>
-          </div>
-          <button onClick={surprise} className="bg-blue-200 rounded-sm p-2">
-            Surprise Me!
+            var translateValue = 0;
+            if (index == reviews.length - 1 && itemIndex == 0) {
+              translateValue = 100;
+            } else if (index == 0 && itemIndex == reviews.length - 1) {
+              translateValue = -100;
+            } else if (itemIndex > index) {
+              translateValue = 100;
+            } else if (itemIndex < index) {
+              translateValue = -100;
+            }
+
+            return (
+              <article
+                style={{
+                  transform: `translateX(${translateValue}%)`,
+                  opacity: itemIndex === index ? 1 : 0,
+                  visibility: itemIndex === index ? `visible` : `hidden`,
+                }}
+              >
+                <Card image={image} name={name} job={job} text={text} />
+              </article>
+            );
+          })}
+        </div>
+        <div className=" space-x-2">
+          <button
+            onClick={handleBackwardClick}
+            className=" bg-white rounded-sm p-2 border-2 border-blue-200 focus:border-blue-400 focus:border-2 focus:border-solid disabled:opacity-40"
+          >
+            &#60;
+          </button>
+          <button
+            onClick={handleForwardClick}
+            className=" bg-white rounded-sm p-2 border-2 border-blue-200 focus:border-blue-400 focus:border-2 focus:border-solid disabled:opacity-40"
+          >
+            {" "}
+            &#62;{" "}
           </button>
         </div>
+        {/* <button onClick={surprise} className="bg-blue-200 rounded-sm p-2 mt-4">
+          Surprise Me!
+        </button> */}
       </div>
     </div>
   );
