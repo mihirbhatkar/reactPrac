@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.form-space form {
+  transition: all 1s cubic-bezier(0.71, -0.38, 0.61, 1.35);
+}
+
+.paragraph-section {
+  transition: all 2s ease-in-out;
+}
+
+/* Scrollbar */
+body {
+  overflow-y: scroll;
+}
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey;
+}
+
+::-webkit-scrollbar-thumb {
+  background: black;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: lightslategrey;
+}
