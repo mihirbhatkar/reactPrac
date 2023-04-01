@@ -1,19 +1,20 @@
+import { List } from "./List";
 import { Alert } from "./Alert";
-import { ListItem } from "./ListItem";
 import { AddItem } from "./AddItem";
 import { useEffect, useState, useRef } from "react";
 
 function App() {
-  const [list, setList] = useState([]);
+  const [storage, setStorage] = useState(localStorage);
+
   const [showAlert, setShowAlert] = useState(false);
   const [alertType, setAlertType] = useState(null);
+
   const [edit, setEdit] = useState(false);
   const [editId, setEditId] = useState(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
-    if (alertType !== null) {
-      setShowAlert(true);
+    if (alertType !== null && showAlert === true) {
       setTimeout(() => {
         setShowAlert(false);
       }, 3000);
@@ -21,12 +22,14 @@ function App() {
   }, [alertType]);
 
   const clearItems = () => {
-    setList([]);
+    localStorage.clear();
+    setStorage(localStorage);
+    setShowAlert(true);
     setAlertType({ type: "success", msg: "List cleared!" });
   };
 
   const editFocus = (id) => {
-    const oldValue = list.filter((item) => item.id == id)[0].item;
+    const oldValue = JSON.parse(localStorage.getItem(id)).itemName;
     inputRef.current.value = oldValue;
     inputRef.current.focus();
     setEdit(true);
@@ -36,24 +39,24 @@ function App() {
   const editForm = (event, editId) => {
     event.preventDefault();
     const updatedValue = event.target.item.value;
-    const updatedItem = { item: updatedValue, id: editId };
-    const updatedList = list.map((item) => {
-      if (item.id === updatedItem.id) {
-        return updatedItem;
-      } else {
-        return item;
-      }
-    });
+    const item = JSON.parse(localStorage.getItem(editId));
+    item.itemName = updatedValue;
+    localStorage.setItem(editId, JSON.stringify(item));
 
-    setList(updatedList);
+    setStorage(localStorage);
+
+    setShowAlert(true);
     setAlertType({ type: "info", msg: "Item updated!" });
     setEdit(false);
+
+    document.getElementById("item").value = "";
   };
 
   const deleteItem = (oldId) => {
-    const newList = list.filter((item) => item.id != oldId);
+    localStorage.removeItem(oldId);
+    setStorage(localStorage);
 
-    setList(newList);
+    setShowAlert(true);
     setAlertType({ type: "error", msg: "Item deleted!" });
 
     document.getElementById("item").value = "";
@@ -63,17 +66,28 @@ function App() {
     e.preventDefault();
     const newItem = e.target.item.value;
     const newId = new Date().getTime();
+    localStorage.setItem(newId, JSON.stringify({ itemName: newItem }));
 
-    setList([...list, { item: newItem, id: newId }]);
+    setStorage(localStorage);
+    setShowAlert(true);
     setAlertType({ type: "success", msg: "Item added!" });
 
     document.getElementById("item").value = "";
   };
+
+  // converting storage to list because cannot render objects
+  const list = Object.keys(storage).map((id) => ({
+    id,
+    item: JSON.parse(storage.getItem(id)),
+  }));
+
   return (
     <div className="max-w-xl mx-auto font-mono ">
       <div className="mt-48 bg-white flex flex-col gap-2 items-center p-4 rounded-xl">
-        <h1 className="text-4xl text-teal-400 font-bold">Grocery Bud!</h1>
-        {}
+        <h1 className="text-4xl text-teal-400 font-bold font-sans">
+          Grocery Bud!
+        </h1>
+
         <AddItem
           edit={edit}
           editId={editId}
@@ -84,28 +98,18 @@ function App() {
 
         {showAlert ? <Alert type={alertType} /> : <p className="hidden"></p>}
 
-        <div className="flex flex-col items-center m-2 gap-2 w-full">
-          {list.map((item) => {
-            return (
-              <ListItem
-                editFocus={editFocus}
-                item={item}
-                deleteItem={deleteItem}
-                key={item.id}
-              />
-            );
-          })}
-          {list.length > 0 ? (
-            <button
-              onClick={clearItems}
-              className="bg-teal-100 border-2 border-transparent focus:border-2 focus:border-teal-200 p-2 rounded-xl mt-2"
-            >
-              Clear Items
-            </button>
-          ) : (
-            <p className="hidden"></p>
-          )}
-        </div>
+        <List list={list} editFocus={editFocus} deleteItem={deleteItem} />
+
+        {storage.length > 0 ? (
+          <button
+            onClick={clearItems}
+            className="bg-teal-100 border-2 border-transparent focus:border-2 focus:border-teal-200 p-2 rounded-xl mt-2"
+          >
+            Clear Items
+          </button>
+        ) : (
+          <p className="hidden"></p>
+        )}
       </div>
     </div>
   );

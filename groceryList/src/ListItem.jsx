@@ -3,7 +3,9 @@ import { BsCheck, BsFillTrashFill } from "react-icons/bs";
 import { GrFormClose } from "react-icons/gr";
 import { AiOutlineEdit } from "react-icons/ai";
 
-export function ListItem({ item: { item, id }, deleteItem, editFocus }) {
+export function ListItem({ item, deleteItem, editFocus }) {
+  const id = item.id;
+  const itemName = item.item.itemName;
   const [checked, setChecked] = useState(false);
 
   return (
@@ -14,7 +16,7 @@ export function ListItem({ item: { item, id }, deleteItem, editFocus }) {
             textDecorationLine: checked ? "line-through" : "",
           }}
         >
-          {item}
+          {itemName}
         </span>
         <div className="space-x-4 ">
           <button
